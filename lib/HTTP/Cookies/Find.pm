@@ -1,5 +1,5 @@
 
-# $rcs = ' $Id: Find.pm,v 1.403 2004/03/07 03:10:15 Daddy Exp $ ' ;
+# $rcs = ' $Id: Find.pm,v 1.404 2004/03/11 11:58:29 Daddy Exp $ ' ;
 
 package HTTP::Cookies::Find;
 use strict;
@@ -24,7 +24,7 @@ use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 %EXPORT_TAGS = ();
 
 my
-$VERSION = do { my @r = (q$Revision: 1.403 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.404 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -218,16 +218,25 @@ sub new
       ; push @aoRet, $oReal
       } # if found any cookies
  UNIX_MOZILLA:
+    while (1)
       {
       ; eval q{use HTTP::Cookies::Mozilla}
       ; my $sAppregFname = catfile(home(), '.mozilla', 'appreg')
       # ; print STDERR " + try to read appreg ==$sAppregFname==\n"
-      ; my $sAppreg = read_file($sAppregFname, binmode => ':raw')
+      ; if (! -f $sAppregFname)
+        {
+        ; _add_error qq{ --- Mozilla file $sAppregFname does not exist\n};
+        ; last UNIX_MOZILLA
+        } # if
+      ; my $sAppreg
+      ; eval { $sAppreg = read_file($sAppregFname, binmode => ':raw') }
+      ; $sAppreg ||= '';
       ; my ($sDir) = ($sAppreg =~ m!(.mozilla/.+?\.slt)\b!)
       # ; print STDERR " + found slt ==$sDir==\n"
       ; my $sFname = catfile(home(), $sDir, 'cookies.txt')
       # ; print STDERR " + try to read cookies ==$sFname==\n"
       ; &_get_cookies($sFname, 'HTTP::Cookies::Mozilla')
+      ; last UNIX_MOZILLA
       } # end of UNIX_MOZILLA block
     # At this point, $oReal contains Mozilla cookies (or undef).
     # ; print STDERR " +   After mozilla cookie check, oReal is ==$oReal==\n"
