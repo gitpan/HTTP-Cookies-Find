@@ -1,9 +1,6 @@
 #line 1 "inc/Module/Install.pm - c:/Perl/site/lib/Module/Install.pm"
-# $File: //depot/cpan/Module-Install/lib/Module/Install.pm $ $Author: autrijus $
-# $Revision: #66 $ $Change: 1847 $ $DateTime: 2003/12/31 23:14:54 $ vim: expandtab shiftwidth=4
-
 package Module::Install;
-$VERSION = '0.32';
+$VERSION = '0.36';
 
 die << "." unless $INC{join('/', inc => split(/::/, __PACKAGE__)).'.pm'};
 Please invoke ${\__PACKAGE__} with:
@@ -22,6 +19,7 @@ use File::Find ();
 use File::Path ();
 
 @inc::Module::Install::ISA = 'Module::Install';
+*inc::Module::Install::VERSION = *VERSION;
 
 #line 129
 
@@ -168,4 +166,4 @@ sub find_extensions {
 
 __END__
 
-#line 614
+#line 617

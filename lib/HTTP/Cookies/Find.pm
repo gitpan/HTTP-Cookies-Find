@@ -1,8 +1,7 @@
 
-# $rcs = ' $Id: Find.pm,v 1.404 2004/03/11 11:58:29 Daddy Exp $ ' ;
+# $rcs = ' $Id: Find.pm,v 1.405 2004/10/31 20:48:40 Daddy Exp $ ' ;
 
 package HTTP::Cookies::Find;
-use strict;
 
 use Carp;
 use Config::IniFiles;
@@ -16,6 +15,8 @@ use HTTP::Cookies;
 use HTTP::Cookies::Netscape;
 use User;
 
+use strict;
+
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 @ISA         = qw( Exporter HTTP::Cookies );
 # Give a hoot don't pollute, do not export more than needed by default
@@ -24,7 +25,7 @@ use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 %EXPORT_TAGS = ();
 
 my
-$VERSION = do { my @r = (q$Revision: 1.404 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.405 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 

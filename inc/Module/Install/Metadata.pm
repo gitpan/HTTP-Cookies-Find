@@ -1,7 +1,4 @@
 #line 1 "inc/Module/Install/Metadata.pm - c:/Perl/site/lib/Module/Install/Metadata.pm"
-# $File: //depot/cpan/Module-Install/lib/Module/Install/Metadata.pm $ $Author: autrijus $
-# $Revision: #31 $ $Change: 1817 $ $DateTime: 2003/12/14 20:57:39 $ vim: expandtab shiftwidth=4
-
 package Module::Install::Metadata;
 use Module::Install::Base; @ISA = qw(Module::Install::Base);
 
@@ -181,7 +178,10 @@ sub version_from {
 sub abstract_from {
     my ($self, $abstract_from) = @_;
     require ExtUtils::MM_Unix;
-    $self->abstract(ExtUtils::MM_Unix->parse_abstract($abstract_from));
+    $self->abstract(
+        bless( { DISTNAME => $self->name }, 'ExtUtils::MM_Unix')
+            ->parse_abstract($abstract_from)
+    );
 }
 
 1;

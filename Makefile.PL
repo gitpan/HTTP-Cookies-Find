@@ -1,3 +1,5 @@
+# $rcs = ' $Id: Makefile.PL,v 1.3 2004/10/08 03:26:37 Daddy Exp Daddy $ ' ;
+
 use inc::Module::Install;
 
 name('HTTP-Cookies-Find');
@@ -11,9 +13,9 @@ requires('File::HomeDir');
 requires('File::Spec');
 requires('File::Slurp');
 requires('HTTP::Cookies');
-requires('HTTP::Cookies::Microsoft');
-requires('HTTP::Cookies::Mozilla');
-requires('HTTP::Cookies::Netscape');
+recommends('HTTP::Cookies::Microsoft') if ($^O =~ m!win32!i);
+recommends('HTTP::Cookies::Mozilla');
+recommends('HTTP::Cookies::Netscape');
 build_requires('Test::More');
 build_requires('Test::Simple');
 requires('User');
@@ -22,11 +24,8 @@ requires('Win32::TieRegistry') if ($^O =~ m!win32!i);
 check_nmake();      # check and download nmake.exe for Win32
 &Makefile->write;
 
-print STDERR <<NOTES;
+print STDERR <<NOTES if ($^O =~ m!win32!i);
 
-Notes:
-HTTP::Cookies::Microsoft is only needed on Windows.
-HTTP::Cookies::Mozilla is only needed on Solaris and Linux.
-Win32::TieRegistry is only needed to find MSIE cookies on Windows.
+Note: Win32::TieRegistry is only needed to find MSIE cookies.
 
 NOTES
