@@ -1,37 +1,36 @@
 use ExtUtils::testlib;
+# use LWP::Debug qw( + );  # So we can see more error messages, if any
 use Test::More no_plan;
 
 BEGIN { use_ok('Data::Dumper') };
 BEGIN { use_ok('HTTP::Cookies::Find') };
 
 use vars qw( $iCount );
+use warnings;
 
 SKIP:
   {
-  skip 'This is not Windows', 8 if ($^O !~ m!win32!i);
+  skip 'This is not Solaris', 8 if ($^O !~ m!solaris!i);
 
-  diag(q{Using real MSIE info from your system});
-  goto DEBUG_NOW;
-  my $o = new HTTP::Cookies::Find(q{no host in the world matches this});
+  my $o = new HTTP::Cookies::Find(q{there better not be any host in the world that matches this});
   ok(ref $o, 'new');
-  is(ref($o), 'HTTP::Cookies::Microsoft');
+  is(ref($o), 'HTTP::Cookies::Netscape');
   $iCount = 0;
   $o->scan(\&cb_count);
   is($iCount, 0);
 
   $o = new HTTP::Cookies::Find();
   ok(ref($o));
-  is(ref($o), 'HTTP::Cookies::Microsoft');
-  # diag(q{The object created is of type }. ref $o);
+  is(ref($o), 'HTTP::Cookies::Netscape');
   $iCount = 0;
   $o->scan(\&cb_count);
   cmp_ok(0, '<', $iCount);
-  diag(sprintf(q{You have a total of %d cookies in MSIE}, $iCount));
+  diag(sprintf(q{You have a total of %d cookies in Netscape}, $iCount));
 
-  my $sHost = 'microsoft';
+  my $sHost = 'netscape';
   $o = new HTTP::Cookies::Find($sHost);
-  ok(ref($o));
-  is(ref($o), 'HTTP::Cookies::Microsoft');
+  ok(ref $o);
+  is(ref($o), 'HTTP::Cookies::Netscape');
   $iCount = 0;
   $o->scan(\&cb_count);
   diag(sprintf(qq{Found %d cookies that match host $sHost}, $iCount));
@@ -41,24 +40,6 @@ SKIP:
     diag(q{Here is a list of all the cookies:});
     $o->scan(\&cb_dump);
     } # if
-
- DEBUG_NOW:
-  # Now call array context.
-  $sHost = 'ebay';
-  # Trick it into finding our test files:
-  $ENV{WINDIR} = 't';
-  diag(q{Using fake Netscape info from the t/ directory});
-  my @ao1 = HTTP::Cookies::Find->new($sHost);
-  foreach my $o1 (@ao1)
-    {
-    ok(ref($o1));
-    my $sBrowser = ref($o1);
-    $sBrowser =~ s!.*::!!;
-    $iCount = 0;
-    $o1->scan(\&cb_count);
-    diag(sprintf(qq{Found %d cookies for $sBrowser\'s browser that match host $sHost}, $iCount));
-    } # foreach
-
   } # end of SKIP block
 
 sub cb_count

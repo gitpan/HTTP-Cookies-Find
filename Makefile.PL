@@ -6,6 +6,9 @@ abstract('Find local cookies file(s) for current user');
 author('Martin Thurn <mthurn@cpan.org>');
 license('perl');
 
+requires('Config::IniFiles');
+requires('File::HomeDir');
+requires('File::Spec');
 requires('HTTP::Cookies');
 requires('HTTP::Cookies::Microsoft');
 # requires('HTTP::Cookies::Netscape');  # for future expansion

@@ -1,0 +1,18 @@
+2003-12-04  Kingpin  <mthurn@verizon.net>
+
+	* t/solaris.t: new file
+
+2003-12-03  Kingpin  <mthurn@verizon.net>
+
+	* lib/HTTP/Cookies/Find.pm (callback_mozilla): added support for Netscape
+
+2003-12-02  Kingpin  <mthurn@verizon.net>
+
+	* t/msie.t: added tests to get all cookies & report the count
+
+	* lib/HTTP/Cookies/Find.pm (new): added stub code for Solaris/Netscape
+
+2003-12-01  Kingpin  <mthurn@verizon.net>
+
+	* lib/HTTP/Cookies/Find.pm: ready for first public release
+

@@ -3,7 +3,7 @@ HTTP::Cookies::Find
 
 Finds cookies for the current user on the local machine.
 Optionally, only returns cookies that match a hostname.
-Only works for MSIE on Windows.
+Only works for MSIE and Netscape on Windows, and Netscape 4 on Unix.
 
 
 INSTALLATION
