@@ -1,25 +1,28 @@
-#line 1 "inc/Module/Install/Metadata.pm - C:/Perl580/site/lib/Module/Install/Metadata.pm"
+#line 1 "inc/Module/Install/Metadata.pm - c:/Perl/site/lib/Module/Install/Metadata.pm"
 # $File: //depot/cpan/Module-Install/lib/Module/Install/Metadata.pm $ $Author: autrijus $
-# $Revision: #26 $ $Change: 1777 $ $DateTime: 2003/10/13 02:25:45 $ vim: expandtab shiftwidth=4
+# $Revision: #31 $ $Change: 1817 $ $DateTime: 2003/12/14 20:57:39 $ vim: expandtab shiftwidth=4
 
 package Module::Install::Metadata;
 use Module::Install::Base; @ISA = qw(Module::Install::Base);
 
-$VERSION = '0.02';
+$VERSION = '0.04';
 
 use strict 'vars';
 use vars qw($VERSION);
 
 sub Meta { shift }
 
-my @scalar_keys = qw(name module_name version abstract author license distribution_type);
+my @scalar_keys = qw(
+    name module_name version abstract author license
+    distribution_type sign perl_version
+);
 my @tuple_keys  = qw(build_requires requires recommends bundles);
 
 foreach my $key (@scalar_keys) {
     *$key = sub {
         my $self = shift;
-        return $self->{values}{$key} unless @_;
-        $self->{values}{$key} = shift;
+        return $self->{'values'}{$key} unless @_;
+        $self->{'values'}{$key} = shift;
         return $self;
     };
 }
@@ -27,13 +30,19 @@ foreach my $key (@scalar_keys) {
 foreach my $key (@tuple_keys) {
     *$key = sub {
         my $self = shift;
-        return $self->{values}{$key} unless @_;
+        return $self->{'values'}{$key} unless @_;
         my @rv;
         while (@_) {
             my $module  = shift or last;
             my $version = shift || 0;
+            if ($module eq 'perl') {
+                $version =~ s{^(\d+)\.(\d+)\.(\d+)}
+                             {$1 + $2/1_000 + $3/1_000_000}e;
+                $self->perl_version($version);
+                next;
+            }
             my $rv = [$module, $version];
-            push @{$self->{values}{$key}}, $rv;
+            push @{$self->{'values'}{$key}}, $rv;
             push @rv, $rv;
         }
         return @rv;
@@ -44,24 +53,53 @@ sub features {
     my $self = shift;
     while (my ($name, $mods) = splice(@_, 0, 2)) {
         my $count = 0;
-        push @{$self->{values}{features}}, ($name => [
+        push @{$self->{'values'}{'features'}}, ($name => [
             map { (++$count % 2 and ref($_) and ($count += $#$_)) ? @$_ : $_ } @$mods
         ] );
     }
-    return @{$self->{values}{features}};
+    return @{$self->{'values'}{'features'}};
+}
+
+sub no_index {
+    my $self = shift;
+    my $type = shift;
+    push @{$self->{'values'}{'no_index'}{$type}}, @_ if $type;
+    return $self->{'values'}{'no_index'};
 }
 
 sub _dump {
     my $self = shift;
     my $package = ref($self->_top);
     my $version = $self->_top->VERSION;
-    my %values = %{$self->{values}};
+    my %values = %{$self->{'values'}};
+
+    delete $values{sign};
+    if (my $perl_version = delete $values{perl_version}) {
+        # Always canonical to three-dot version 
+        $perl_version =~ s{^(\d+)\.(\d\d\d)(\d*)}{join('.', $1, int($2), int($3))}e
+            if $perl_version >= 5.006;
+        $values{requires} = [
+            [perl => $perl_version],
+            @{$values{requires}||[]},
+        ];
+    }
+
+    warn "No license specified, setting license = 'unknown'\n"
+        unless $values{license};
+
+    $values{license} ||= 'unknown';
     $values{distribution_type} ||= 'module';
     $values{name} ||= do {
         my $name = $values{module_name};
         $name =~ s/::/-/g;
         $name;
     } if $values{module_name};
+
+    if ($values{name} =~ /::/) {
+        my $name = $values{name};
+        $name =~ s/::/-/g;
+        die "Error in name(): '$values{name}' should be '$name'!\n";
+    }
 
     my $dump = '';
     foreach my $key (@scalar_keys) {
@@ -70,18 +108,27 @@ sub _dump {
     foreach my $key (@tuple_keys) {
         next unless exists $values{$key};
         $dump .= "$key:\n";
-        $dump .= "  $_->[0]: $_->[1]\n" for @{$values{$key}};
+        foreach (@{$values{$key}}) {
+            $dump .= "  $_->[0]: $_->[1]\n";
+        }
     }
 
-    return($dump . << "META");
+    if (my $no_index = $values{no_index}) {
+        push @{$no_index->{'directory'}}, 'inc';
+        require YAML;
+        local $YAML::UseHeader = 0;
+        $dump .= YAML::Dump({ no_index => $no_index});
+    }
+    else {
+        $dump .= << "META";
 no_index:
   directory:
     - inc
-private:
-  directory:
-    - inc
-generated_by: $package version $version
 META
+    }
+    
+    $dump .= "generated_by: $package version $version\n";
+    return $dump;
 }
 
 sub read {
@@ -114,7 +161,7 @@ sub write {
             while (<FH>) {
                 last META_NOT_OURS if /^generated_by: Module::Install\b/;
             }
-            return $self;
+            return $self if -s FH;
         }
     }
 

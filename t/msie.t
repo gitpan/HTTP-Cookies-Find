@@ -11,30 +11,39 @@ SKIP:
   skip 'This is not Windows', 8 if ($^O !~ m!win32!i);
 
   diag(q{Using real MSIE info from your system});
-  goto DEBUG_NOW;
+  # goto DEBUG_NOW;
   my $o = new HTTP::Cookies::Find(q{no host in the world matches this});
-  ok(ref $o, 'new');
-  is(ref($o), 'HTTP::Cookies::Microsoft');
+  &dump_errors;
+  isa_ok($o, 'HTTP::Cookies::Microsoft');
   $iCount = 0;
   $o->scan(\&cb_count);
   is($iCount, 0);
 
   $o = new HTTP::Cookies::Find();
-  ok(ref($o));
-  is(ref($o), 'HTTP::Cookies::Microsoft');
+  &dump_errors;
+  isa_ok($o, 'HTTP::Cookies::Microsoft');
   # diag(q{The object created is of type }. ref $o);
   $iCount = 0;
   $o->scan(\&cb_count);
   cmp_ok(0, '<', $iCount);
   diag(sprintf(q{You have a total of %d cookies in MSIE}, $iCount));
 
-  my $sHost = 'microsoft';
+  my $sHost = 'soft';
   $o = new HTTP::Cookies::Find($sHost);
-  ok(ref($o));
-  is(ref($o), 'HTTP::Cookies::Microsoft');
+  &dump_errors;
+  isa_ok($o, 'HTTP::Cookies::Microsoft');
   $iCount = 0;
   $o->scan(\&cb_count);
-  diag(sprintf(qq{Found %d cookies that match host $sHost}, $iCount));
+  diag(sprintf(qq{Found %d MSIE cookies that match host $sHost}, $iCount));
+
+  $sHost = qr'go+gle';
+  $o = new HTTP::Cookies::Find($sHost);
+  &dump_errors;
+  isa_ok($o, 'HTTP::Cookies::Microsoft');
+  $iCount = 0;
+  $o->scan(\&cb_count);
+  cmp_ok(0, '<', $iCount);
+  diag(sprintf(qq{Found %d MSIE cookies that match host $sHost}, $iCount));
 
   if (0)
     {
@@ -46,9 +55,10 @@ SKIP:
   # Now call array context.
   $sHost = 'ebay';
   # Trick it into finding our test files:
-  $ENV{WINDIR} = 't';
-  diag(q{Using fake Netscape info from the t/ directory});
+  $ENV{WINDIR} = './t';
+  diag(qq{Using fake Netscape info from directory $ENV{WINDIR}});
   my @ao1 = HTTP::Cookies::Find->new($sHost);
+  &dump_errors;
   foreach my $o1 (@ao1)
     {
     ok(ref($o1));
@@ -86,6 +96,14 @@ sub cb_dump
   print STDERR " +   discard==$discard==\n";
   print STDERR " +   hash==", Dumper($hash);
   } # cb_dump
+
+sub dump_errors
+  {
+  foreach my $sError (HTTP::Cookies::Find::errors)
+    {
+    diag($sError);
+    } # foreach
+  } # dump_errors
 
 1;
 

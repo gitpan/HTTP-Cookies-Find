@@ -1,10 +1,25 @@
-2003-12-04  Kingpin  <mthurn@verizon.net>
+2004-03-06  Kingpin  <mthurn@verizon.net>
 
-	* t/solaris.t: new file
+	* lib/HTTP/Cookies/Find.pm (errors): new function
+
+2004-03-03  Kingpin  <mthurn@verizon.net>
+
+	* lib/HTTP/Cookies/Find.pm (_get_cookies): new function
+	(new): add support for Mozilla browser on *nix
+
+2004-01-23  Kingpin  <mthurn@verizon.net>
+
+	* t/solaris.t: skip tests if no cookies file found
+
+2003-12-05  Kingpin  <mthurn@verizon.net>
+
+	* VERSION 1.03 RELEASED
 
 2003-12-03  Kingpin  <mthurn@verizon.net>
 
-	* lib/HTTP/Cookies/Find.pm (callback_mozilla): added support for Netscape
+	* t/solaris.t: new file
+	* lib/HTTP/Cookies/Find.pm: added support for Netscape on Windows
+	* lib/HTTP/Cookies/Find.pm: added support for Netscape 4 on Solaris
 
 2003-12-02  Kingpin  <mthurn@verizon.net>
 

@@ -1,6 +1,6 @@
-#line 1 "inc/Module/Install/Makefile.pm - C:/Perl580/site/lib/Module/Install/Makefile.pm"
+#line 1 "inc/Module/Install/Makefile.pm - c:/Perl/site/lib/Module/Install/Makefile.pm"
 # $File: //depot/cpan/Module-Install/lib/Module/Install/Makefile.pm $ $Author: autrijus $
-# $Revision: #45 $ $Change: 1645 $ $DateTime: 2003/07/16 01:05:06 $ vim: expandtab shiftwidth=4
+# $Revision: #53 $ $Change: 1847 $ $DateTime: 2003/12/31 23:14:54 $ vim: expandtab shiftwidth=4
 
 package Module::Install::Makefile;
 use Module::Install::Base; @ISA = qw(Module::Install::Base);
@@ -28,7 +28,22 @@ sub makemaker_args {
 
 sub clean_files {
     my $self = shift;
-    $self->makemaker_args( clean => { FILES => "@_ " } );
+    my $clean = $self->makemaker_args->{clean} ||= {};
+    %$clean = (
+        %$clean, 
+        FILES => join(" ", grep length, $clean->{FILES}, @_),
+    );
+}
+
+sub libs {
+    my $self = shift;
+    my $libs = ref $_[0] ? shift : [shift];
+    $self->makemaker_args( LIBS => $libs );
+}
+
+sub inc {
+    my $self = shift;
+    $self->makemaker_args( INC => shift );
 }
 
 sub write {
@@ -46,10 +61,13 @@ sub write {
 	$args->{ABSTRACT} = $self->abstract;
 	$args->{AUTHOR} = $self->author;
     }
-    if ( eval($ExtUtils::MakeMaker::VERSION) >= 6.10 )
-    {
+    if ( eval($ExtUtils::MakeMaker::VERSION) >= 6.10 ) {
         $args->{NO_META} = 1;
     }
+    if ( eval($ExtUtils::MakeMaker::VERSION) > 6.17 ) {
+	$args->{SIGN} = 1 if $self->sign;
+    }
+    delete $args->{SIGN} unless $self->is_admin;
 
     # merge both kinds of requires into prereq_pm
     my $prereq = ($args->{PREREQ_PM} ||= {});
@@ -58,8 +76,16 @@ sub write {
 
     # merge both kinds of requires into prereq_pm
     my $dir = ($args->{DIR} ||= []);
-    push @$dir, map "$self->{prefix}/$self->{bundle}/$_->[1]", @{$self->bundles}
-        if $self->bundles;
+    if ($self->bundles) {
+        push @$dir, map "$_->[1]", @{$self->bundles};
+        delete $prereq->{$_->[0]} for @{$self->bundles};
+    }
+
+    if (my $perl_version = $self->perl_version) {
+        eval "use $perl_version; 1"
+            or die "ERROR: perl: Version $] is installed, ".
+                   "but we need version >= $perl_version";
+    }
 
     my %args = map {($_ => $args->{$_})} grep {defined($args->{$_})} keys %$args;
 
@@ -87,6 +113,13 @@ sub fix_up_makefile {
     my $makefile = do { local $/; <MAKEFILE> };
     close MAKEFILE;
 
+    $makefile =~ s/\b(test_harness\(\$\(TEST_VERBOSE\), )/$1'inc', /;
+    $makefile =~ s/( -I\$\(INST_ARCHLIB\))/ -Iinc$1/g;
+    $makefile =~ s/( "-I\$\(INST_LIB\)")/ "-Iinc"$1/g;
+
+    $makefile =~ s/^(FULLPERL = .*)/$1 -Iinc/m;
+    $makefile =~ s/^(PERL = .*)/$1 -Iinc/m;
+
     open MAKEFILE, '> Makefile' or die $!;
     print MAKEFILE "$preamble$makefile$postamble";
     close MAKEFILE;
@@ -110,4 +143,4 @@ sub postamble {
 
 __END__
 
-#line 242
+#line 276

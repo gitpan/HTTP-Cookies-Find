@@ -10,13 +10,13 @@ use warnings;
 
 SKIP:
   {
-  skip 'This is not Solaris', 7 if ($^O !~ m!solaris!i);
+  skip 'This is not Linux', 7 if ($^O !~ m!linux!i);
 
   my $o = new HTTP::Cookies::Find(q{no host in the world matches this});
   &dump_errors;
  SKIP:
     {
-    skip 'current user has no Netscape cookies file', 6 unless (ref($o) eq 'HTTP::Cookies::Netscape');
+    skip 'current user has no Mozilla cookies file', 6 unless (ref($o) eq 'HTTP::Cookies::Mozilla');
 
     $iCount = 0;
     $o->scan(\&cb_count);
@@ -24,17 +24,17 @@ SKIP:
 
     $o = new HTTP::Cookies::Find();
     &dump_errors;
-    isa_ok($o, 'HTTP::Cookies::Netscape');
+    isa_ok($o, 'HTTP::Cookies::Mozilla');
     $iCount = 0;
     $o->scan(\&cb_count);
     cmp_ok(0, '<', $iCount);
-    diag(sprintf(q{You have a total of %d cookies in Netscape}, $iCount));
+    diag(sprintf(q{You have a total of %d cookies in Mozilla}, $iCount));
 
-    my $sHost = 'netscape';
+    my $sHost = 'google';
     $o = new HTTP::Cookies::Find($sHost);
     &dump_errors;
     ok(ref $o);
-    is(ref($o), 'HTTP::Cookies::Netscape');
+    is(ref($o), 'HTTP::Cookies::Mozilla');
     $iCount = 0;
     $o->scan(\&cb_count);
     diag(sprintf(qq{Found %d cookies that match host $sHost}, $iCount));

@@ -9,15 +9,24 @@ license('perl');
 requires('Config::IniFiles');
 requires('File::HomeDir');
 requires('File::Spec');
+requires('File::Slurp');
 requires('HTTP::Cookies');
 requires('HTTP::Cookies::Microsoft');
-# requires('HTTP::Cookies::Netscape');  # for future expansion
-include_deps('Test::More', 5.004);
+requires('HTTP::Cookies::Mozilla');
+requires('HTTP::Cookies::Netscape');
 build_requires('Test::More');
-include_deps('Test::Simple', 5.004);
 build_requires('Test::Simple');
 requires('User');
 requires('Win32::TieRegistry') if ($^O =~ m!win32!i);
 
 check_nmake();      # check and download nmake.exe for Win32
 &Makefile->write;
+
+print STDERR <<NOTES;
+
+Notes:
+HTTP::Cookies::Microsoft is only needed on Windows.
+HTTP::Cookies::Mozilla is only needed on Solaris and Linux.
+Win32::TieRegistry is only needed to find MSIE cookies on Windows.
+
+NOTES
