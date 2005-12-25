@@ -1,3 +1,5 @@
+# $Id: msie.t,v 1.11 2005/12/25 00:03:06 Daddy Exp $
+
 use ExtUtils::testlib;
 use Test::More no_plan;
 
@@ -17,7 +19,7 @@ SKIP:
   isa_ok($o, 'HTTP::Cookies::Microsoft');
   $iCount = 0;
   $o->scan(\&cb_count);
-  is($iCount, 0);
+  is($iCount, 0, 'no cookies for impossible host');
 
   $o = new HTTP::Cookies::Find();
   &dump_errors;
@@ -25,8 +27,8 @@ SKIP:
   # diag(q{The object created is of type }. ref $o);
   $iCount = 0;
   $o->scan(\&cb_count);
-  cmp_ok(0, '<', $iCount);
   diag(sprintf(q{You have a total of %d cookies in MSIE}, $iCount));
+  cmp_ok(0, '<', $iCount, 'found ANY msie cookies');
 
   my $sHost = 'soft';
   $o = new HTTP::Cookies::Find($sHost);
@@ -36,14 +38,14 @@ SKIP:
   $o->scan(\&cb_count);
   diag(sprintf(qq{Found %d MSIE cookies that match host $sHost}, $iCount));
 
-  $sHost = qr'go+gle';
+  $sHost = qr'yaho+';
   $o = new HTTP::Cookies::Find($sHost);
   &dump_errors;
   isa_ok($o, 'HTTP::Cookies::Microsoft');
   $iCount = 0;
   $o->scan(\&cb_count);
-  cmp_ok(0, '<', $iCount);
   diag(sprintf(qq{Found %d MSIE cookies that match host $sHost}, $iCount));
+  # cmp_ok(0, '<', $iCount);
 
   if (0)
     {
@@ -108,3 +110,4 @@ sub dump_errors
 1;
 
 __END__
+

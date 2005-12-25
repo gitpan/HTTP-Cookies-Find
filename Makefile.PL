@@ -1,4 +1,4 @@
-# $rcs = ' $Id: Makefile.PL,v 1.3 2004/10/08 03:26:37 Daddy Exp Daddy $ ' ;
+# $rcs = ' $Id: Makefile.PL,v 1.5 2005/07/09 14:38:13 Daddy Exp $ ' ;
 
 use inc::Module::Install;
 
@@ -21,11 +21,15 @@ build_requires('Test::Simple');
 requires('User');
 requires('Win32::TieRegistry') if ($^O =~ m!win32!i);
 
-check_nmake();      # check and download nmake.exe for Win32
-&Makefile->write;
+WriteAll;
 
 print STDERR <<NOTES if ($^O =~ m!win32!i);
 
 Note: Win32::TieRegistry is only needed to find MSIE cookies.
 
 NOTES
+
+1;
+
+__END__
+

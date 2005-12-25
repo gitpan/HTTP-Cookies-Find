@@ -1,5 +1,5 @@
 
-# $rcs = ' $Id: Find.pm,v 1.405 2004/10/31 20:48:40 Daddy Exp $ ' ;
+# $rcs = ' $Id: Find.pm,v 1.408 2005/12/25 00:03:31 Daddy Exp $ ' ;
 
 package HTTP::Cookies::Find;
 
@@ -25,7 +25,7 @@ use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 %EXPORT_TAGS = ();
 
 my
-$VERSION = do { my @r = (q$Revision: 1.405 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.408 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -54,7 +54,7 @@ cookies.
 If no argument is given to new(), the returned object(s) contain read-only copies of ALL cookies.
 If an argument is given to new(), the returned object(s) contain read-only copies of only those cookies whose hostname "matches" the argument.
 Here "matches" means case-insensitive pattern match;
-you can pass a qr{} literal as well as a plain string for matching.
+you can pass a qr{} regexp as well as a plain string for matching.
 
 =head1 USAGE
 
@@ -101,7 +101,7 @@ sub new
       $sHost =~ s!\.[a-z][a-z]\.[a-z][a-z]\Z!!;  # delete intl domain
       # We only look at cookies for the logged-in user:
       $sUser = lc User->Login;
-      print STDERR " + Finding cookies for user $sUser...\n" if DEBUG_NEW;
+      print STDERR " + Finding cookies for user $sUser with host matching ($sHost)...\n" if DEBUG_NEW;
       my ($sDir, %hsRegistry);
       eval q{require HTTP::Cookies::Microsoft};
       if ($@)
@@ -312,11 +312,11 @@ sub _callback_msie
       $secure, $expires, $discard, $hash) = @_;
   # All we care about at this level is the filename, which is in the
   # $val slot:
-  print STDERR " + consider cookie, val==$val==\n" if (1 < DEBUG_NEW);
+  print STDERR " + consider cookie, val==$val==\n" if (DEBUG_NEW);
   return unless ($val =~ m!\@.*$sHostGlobal!i);
-  print STDERR " +   matches host ($sHostGlobal)\n" if DEBUG_NEW;
-  return unless ($val =~ m!$sUser\@!);
-  print STDERR " +   matches user ($sUser)\n" if DEBUG_NEW;
+  print STDERR " +   matches host ($sHostGlobal)\n" if (1 < DEBUG_NEW);
+  return unless ($val =~ m!\\$sUser\@!);
+  print STDERR " +   matches user ($sUser)\n" if (1 < DEBUG_NEW);
   # This cookie file matches the user and host.  Add it to the cookies
   # we'll keep:
   $oReal->load_cookie($val);

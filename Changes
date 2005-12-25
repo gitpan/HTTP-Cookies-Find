@@ -1,3 +1,7 @@
+2005-12-24    <Daddy@C-3PO>
+
+	* Find.pm (_callback_msie): avoid username substring mis-match
+
 2004-03-06  Kingpin  <mthurn@verizon.net>
 
 	* lib/HTTP/Cookies/Find.pm (errors): new function

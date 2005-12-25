@@ -1,0 +1,25 @@
+name: HTTP-Cookies-Find
+version: 1.408
+abstract: Find local cookies file(s) for current user
+author: Martin Thurn <mthurn@cpan.org>
+license: perl
+distribution_type: module
+build_requires:
+  Test::More: 0
+  Test::Simple: 0
+requires:
+  Config::IniFiles: 0
+  File::HomeDir: 0
+  File::Spec: 0
+  File::Slurp: 0
+  HTTP::Cookies: 0
+  User: 0
+  Win32::TieRegistry: 0
+recommends:
+  HTTP::Cookies::Microsoft: 0
+  HTTP::Cookies::Mozilla: 0
+  HTTP::Cookies::Netscape: 0
+no_index:
+  directory:
+    - inc
+generated_by: Module::Install version 0.44

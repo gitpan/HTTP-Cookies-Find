@@ -1,3 +1,5 @@
+# $Id: solaris.t,v 1.5 2005/07/09 14:41:44 Daddy Exp $
+
 use ExtUtils::testlib;
 # use LWP::Debug qw( + );  # So we can see more error messages, if any
 use Test::More no_plan;
@@ -84,3 +86,4 @@ sub dump_errors
 1;
 
 __END__
+
