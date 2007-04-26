@@ -1,4 +1,4 @@
-# $rcs = ' $Id: Makefile.PL,v 1.5 2005/07/09 14:38:13 Daddy Exp $ ' ;
+# $rcs = ' $Id: Makefile.PL,v 1.6 2005/12/25 00:07:41 Daddy Exp $ ' ;
 
 use inc::Module::Install;
 

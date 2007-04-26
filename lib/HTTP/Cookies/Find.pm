@@ -1,12 +1,11 @@
 
-# $rcs = ' $Id: Find.pm,v 1.408 2005/12/25 00:03:31 Daddy Exp $ ' ;
+# $rcs = ' $Id: Find.pm,v 1.410 2007/04/26 02:45:28 Daddy Exp $ ' ;
 
 package HTTP::Cookies::Find;
 
 use Carp;
 use Config::IniFiles;
 use Data::Dumper;  # for debugging only
-use Exporter ();
 use File::HomeDir;
 use File::Spec::Functions;
 use File::Slurp;
@@ -17,15 +16,10 @@ use User;
 
 use strict;
 
-use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
-@ISA         = qw( Exporter HTTP::Cookies );
-# Give a hoot don't pollute, do not export more than needed by default
-@EXPORT      = qw( );
-@EXPORT_OK   = qw( );
-%EXPORT_TAGS = ();
+use base 'HTTP::Cookies';
 
 my
-$VERSION = do { my @r = (q$Revision: 1.408 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.410 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -56,8 +50,11 @@ If an argument is given to new(), the returned object(s) contain read-only copie
 Here "matches" means case-insensitive pattern match;
 you can pass a qr{} regexp as well as a plain string for matching.
 
-=head1 USAGE
+=head1 METHODS
 
+=over
+
+=item new
 
 
 =cut
@@ -76,11 +73,6 @@ sub _add_error
   {
   push @asError, shift;
   } # _add_error
-
-sub errors
-  {
-  return @asError;
-  } # errors
 
 sub new
   {
@@ -255,6 +247,17 @@ sub new
   return wantarray ? @aoRet : $oReal;
   } # new
 
+=item errors
+
+If anything went wrong while finding cookies,
+errors() will return a list of string(s) describing the error(s).
+
+=cut
+
+sub errors
+  {
+  return @asError;
+  } # errors
 
 sub _get_cookies
   {
@@ -336,6 +339,8 @@ sub _callback_mozilla
   print STDERR " +     domain ($sDomain) matches host ($sHostGlobal)\n" if DEBUG_NEW;
   $oReal->set_cookie(@_);
   } # _callback_mozilla
+
+=back
 
 =head1 BUGS
 
