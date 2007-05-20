@@ -16,6 +16,7 @@ t/cookies.txt
 t/linux.t
 t/msie.t
 t/netscape.ini
+t/pod-coverage.t
 t/pod.t
 t/solaris.t
 t/win.ini

@@ -1,7 +1,11 @@
 
-# $rcs = ' $Id: Find.pm,v 1.410 2007/04/26 02:45:28 Daddy Exp $ ' ;
+# $rcs = ' $Id: Find.pm,v 1.412 2007/05/20 14:11:46 Daddy Exp $ ' ;
 
 package HTTP::Cookies::Find;
+
+use strict;
+
+use base 'HTTP::Cookies';
 
 use Carp;
 use Config::IniFiles;
@@ -9,17 +13,11 @@ use Data::Dumper;  # for debugging only
 use File::HomeDir;
 use File::Spec::Functions;
 use File::Slurp;
-use HTTP::Cookies;
-# use HTTP::Cookies::Mozilla;
 use HTTP::Cookies::Netscape;
 use User;
 
-use strict;
-
-use base 'HTTP::Cookies';
-
-my
-$VERSION = do { my @r = (q$Revision: 1.410 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+our
+$VERSION = do { my @r = (q$Revision: 1.412 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -364,4 +362,3 @@ HTTP::Cookies, HTTP::Cookies::Microsoft, HTTP::Cookies::Mozilla, HTTP::Cookies::
 1;
 
 __END__
-
