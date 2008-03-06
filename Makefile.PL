@@ -1,4 +1,4 @@
-# $rcs = ' $Id: Makefile.PL,v 1.6 2005/12/25 00:07:41 Daddy Exp $ ' ;
+# $Id: Makefile.PL,v 1.7 2008/03/06 04:22:03 Daddy Exp $
 
 use inc::Module::Install;
 
@@ -13,21 +13,26 @@ requires('File::HomeDir');
 requires('File::Spec');
 requires('File::Slurp');
 requires('HTTP::Cookies');
-recommends('HTTP::Cookies::Microsoft') if ($^O =~ m!win32!i);
 recommends('HTTP::Cookies::Mozilla');
 recommends('HTTP::Cookies::Netscape');
 build_requires('Test::More');
 build_requires('Test::Simple');
 requires('User');
-requires('Win32::TieRegistry') if ($^O =~ m!win32!i);
 
-WriteAll;
+if ($^O =~ m!win32!i)
+  {
+  recommends('HTTP::Cookies::Microsoft');
+  requires('Win32::TieRegistry');
+  print STDERR <<'NOTES';
 
-print STDERR <<NOTES if ($^O =~ m!win32!i);
-
-Note: Win32::TieRegistry is only needed to find MSIE cookies.
+Note: Win32::TieRegistry is only needed to find MSIE cookies;
+      you will still be able to find Mozilla cookies if you
+      don't have Win32::TieRegistry.
 
 NOTES
+  } # if
+
+WriteAll;
 
 1;
 

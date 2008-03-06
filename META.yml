@@ -1,11 +1,12 @@
 --- 
 abstract: Find local cookies file(s) for current user
-author: Martin Thurn <mthurn@cpan.org>
+author: 
+  - Martin Thurn <mthurn@cpan.org>
 build_requires: 
   Test::More: 0
   Test::Simple: 0
 distribution_type: module
-generated_by: Module::Install version 0.67
+generated_by: Module::Install version 0.68
 license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -27,4 +28,4 @@ requires:
   HTTP::Cookies: 0
   User: 0
   Win32::TieRegistry: 0
-version: 1.412
+version: 1.413

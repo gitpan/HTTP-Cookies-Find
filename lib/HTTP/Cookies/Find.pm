@@ -1,5 +1,5 @@
 
-# $rcs = ' $Id: Find.pm,v 1.412 2007/05/20 14:11:46 Daddy Exp $ ' ;
+# $Id: Find.pm,v 1.413 2008/03/06 04:21:03 Daddy Exp $
 
 package HTTP::Cookies::Find;
 
@@ -17,7 +17,7 @@ use HTTP::Cookies::Netscape;
 use User;
 
 our
-$VERSION = do { my @r = (q$Revision: 1.412 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.413 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -39,14 +39,6 @@ HTTP::Cookies::Find - Locate cookies for the current user on the local machine.
 =head1 DESCRIPTION
 
 Looks in various normal places for HTTP cookie files.
-Returns an object (or array of objects) of type HTTP::Cookies::[vendor].
-The returned object(s) are not tied to the cookie files;
-the returned object(s) contain read-only copies of the found
-cookies.
-If no argument is given to new(), the returned object(s) contain read-only copies of ALL cookies.
-If an argument is given to new(), the returned object(s) contain read-only copies of only those cookies whose hostname "matches" the argument.
-Here "matches" means case-insensitive pattern match;
-you can pass a qr{} regexp as well as a plain string for matching.
 
 =head1 METHODS
 
@@ -54,6 +46,15 @@ you can pass a qr{} regexp as well as a plain string for matching.
 
 =item new
 
+Returns a list of cookie jars of type HTTP::Cookies::[vendor],
+for all vendor browsers found on the system.
+If called in scalar context, returns one cookie jar for the "first" vendor browser found on the system.
+The returned cookie objects are not tied to the cookie files on disk;
+the returned cookie objects are read-only copies of the found cookies.
+If no argument is given, the returned cookie objects contain read-only copies of ALL cookies.
+If an argument is given, the returned cookie objects contain read-only copies of only those cookies whose hostname "matches" the argument.
+Here "matches" means case-insensitive pattern match;
+you can pass a qr{} regexp as well as a plain string for matching.
 
 =cut
 
@@ -79,10 +80,7 @@ sub new
   my @aoRet;
   if ($^O =~ m!win32!i)
     {
-    # We use a fake while loop so we can abort the MSIE process at any
-    # time (without using goto):
  WIN32_MSIE:
-    while (1)
       {
       # Massage the hostname in an attempt to make it match MS' highlevel
       # naming scheme:
@@ -120,9 +118,8 @@ sub new
         ; last WIN32_MSIE
         } # unless
       ; my $sFnameCookies = "$sDir\\index.dat"
-      ; &_get_cookies($sFnameCookies, 'HTTP::Cookies::Microsoft')
-      ; last WIN32_MSIE
-      } # end of WIN32_MSIE while block
+      ; _get_cookies($sFnameCookies, 'HTTP::Cookies::Microsoft')
+      } # end of WIN32_MSIE block
     # At this point, $oReal contains MSIE cookies (or undef).
     if (ref($oReal))
       {
@@ -165,7 +162,6 @@ sub new
         } # if
       ; my $sFnameCookies = $oIniNS->val('Cookies', 'Cookie File')
       ; &_get_cookies($sFnameCookies, 'HTTP::Cookies::Netscape')
-      ; last WIN32_NETSCAPE;
       } # end of WIN32_NETSCAPE block
     # At this point, $oReal contains Netscape cookies (or undef).
     if (ref($oReal))
@@ -209,7 +205,6 @@ sub new
       ; push @aoRet, $oReal
       } # if found any cookies
  UNIX_MOZILLA:
-    while (1)
       {
       ; eval q{use HTTP::Cookies::Mozilla}
       ; my $sAppregFname = catfile(home(), '.mozilla', 'appreg')
@@ -227,7 +222,6 @@ sub new
       ; my $sFname = catfile(home(), $sDir, 'cookies.txt')
       # ; print STDERR " + try to read cookies ==$sFname==\n"
       ; &_get_cookies($sFname, 'HTTP::Cookies::Mozilla')
-      ; last UNIX_MOZILLA
       } # end of UNIX_MOZILLA block
     # At this point, $oReal contains Mozilla cookies (or undef).
     # ; print STDERR " +   After mozilla cookie check, oReal is ==$oReal==\n"
@@ -263,13 +257,10 @@ sub _get_cookies
   my $sFnameCookies = shift;
   # Required arg2 = cookies object type:
   my $sClass = shift;
-  my $rcCallback = ($sClass =~ m!Microsoft!)
-  ? \&_callback_msie
-  : ($sClass =~ m!Netscape!)
-  ? \&_callback_mozilla
-  : ($sClass =~ m!Mozilla!)
-  ? \&_callback_mozilla
-  : \&_callback_mozilla;
+  my $rcCallback = ($sClass =~ m!Microsoft!) ? \&_callback_msie
+                 : ($sClass =~ m!Netscape!)  ? \&_callback_mozilla
+                 : ($sClass =~ m!Mozilla!)   ? \&_callback_mozilla
+                 :                             \&_callback_mozilla;
   # Our return value is an object of type HTTP::Cookies.
   print STDERR " + _get_cookies($sFnameCookies,$sClass)\n" if DEBUG_GET;
   if (! -f $sFnameCookies)
