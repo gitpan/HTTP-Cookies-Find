@@ -1,5 +1,5 @@
 
-# $Id: Find.pm,v 1.413 2008/03/06 04:21:03 Daddy Exp $
+# $Id: Find.pm,v 1.414 2008/05/01 22:52:42 Martin Exp $
 
 package HTTP::Cookies::Find;
 
@@ -13,11 +13,12 @@ use Data::Dumper;  # for debugging only
 use File::HomeDir;
 use File::Spec::Functions;
 use File::Slurp;
+use HTTP::Cookies::Mozilla;
 use HTTP::Cookies::Netscape;
 use User;
 
 our
-$VERSION = do { my @r = (q$Revision: 1.413 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.414 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -117,8 +118,16 @@ sub new
         ; _add_error qq{ --- registry entry for MSIE cookies is $sDir but that directory does not exist.\n}
         ; last WIN32_MSIE
         } # unless
-      ; my $sFnameCookies = "$sDir\\index.dat"
-      ; _get_cookies($sFnameCookies, 'HTTP::Cookies::Microsoft')
+      # index.dat is for XP; Low/index.dat is for Vista:
+      foreach my $sFnameBase (qw( index.dat Low/index.dat ))
+        {
+        my $sFnameCookies = "$sDir\\$sFnameBase";
+        if (-f $sFnameCookies)
+          {
+          _get_cookies($sFnameCookies, 'HTTP::Cookies::Microsoft');
+          last WIN32_MSIE;
+          } # if
+        } # foreach
       } # end of WIN32_MSIE block
     # At this point, $oReal contains MSIE cookies (or undef).
     if (ref($oReal))
@@ -160,8 +169,8 @@ sub new
         _add_error qq{ --- can not parse $sFnameNSIni\n};
         last WIN32_NETSCAPE;
         } # if
-      ; my $sFnameCookies = $oIniNS->val('Cookies', 'Cookie File')
-      ; &_get_cookies($sFnameCookies, 'HTTP::Cookies::Netscape')
+      my $sFnameCookies = $oIniNS->val('Cookies', 'Cookie File');
+      _get_cookies($sFnameCookies, 'HTTP::Cookies::Netscape');
       } # end of WIN32_NETSCAPE block
     # At this point, $oReal contains Netscape cookies (or undef).
     if (ref($oReal))
@@ -169,6 +178,35 @@ sub new
       return $oReal if ! wantarray;
       push @aoRet, $oReal;
       } # if found Netscape cookies
+      # If wantarray, or the previous cookie searches failed, go on and
+    # look for FireFox cookies:
+ WIN32_FIREFOX:
+      {
+      $oReal = undef;
+      my $sProfileDir = "$ENV{APPDATA}/Mozilla/Firefox/Profiles";
+      opendir (DIR, $sProfileDir) or _add_error qq{ --- Can't open Mozilla profile directory ( $sProfileDir ): $! };
+      my $bMozFound;
+      while ( my $test = readdir( DIR ) )
+        {
+        if ( -d "$sProfileDir/$test" && -f "$sProfileDir/$test/cookies.txt" )
+          {
+          $bMozFound = 1;
+          my $sFnameCookies = "$sProfileDir/$test/cookies.txt";
+          _get_cookies($sFnameCookies, 'HTTP::Cookies::Mozilla');
+          } # if
+        } # while
+      closedir DIR or warn;
+      if ( ! $bMozFound )
+        {
+        _add_error qq{ --- No Mozilla cookie files found under $sProfileDir\\* }
+        } # if
+      } # end of WIN32_FIREFOX block
+    # At this point, $oReal contains Netscape cookies (or undef):
+    if (ref($oReal))
+      {
+      return $oReal if ! wantarray;
+      push @aoRet, $oReal;
+      } # if found Mozilla cookies
     # No more places to look, fall through and return what we've
     # found.
     } # if MSWin32
@@ -184,7 +222,7 @@ sub new
       {
       ; my $sFname = catfile(home(), '.netscape', 'cookies')
       ; print STDERR " + try $sFname...\n" if DEBUG_NEW
-      ; &_get_cookies($sFname, 'HTTP::Cookies::Netscape')
+      ; _get_cookies($sFname, 'HTTP::Cookies::Netscape')
       ; last UNIX_NETSCAPE4 unless ref($oReal)
       ; push @aoRet, $oReal
       } # end of UNIX_NETSCAPE4 block
@@ -221,7 +259,7 @@ sub new
       # ; print STDERR " + found slt ==$sDir==\n"
       ; my $sFname = catfile(home(), $sDir, 'cookies.txt')
       # ; print STDERR " + try to read cookies ==$sFname==\n"
-      ; &_get_cookies($sFname, 'HTTP::Cookies::Mozilla')
+      ; _get_cookies($sFname, 'HTTP::Cookies::Mozilla')
       } # end of UNIX_MOZILLA block
     # At this point, $oReal contains Mozilla cookies (or undef).
     # ; print STDERR " +   After mozilla cookie check, oReal is ==$oReal==\n"
@@ -231,7 +269,7 @@ sub new
       # ; print STDERR " +   wantarray, keep looking\n"
       ; push @aoRet, $oReal
       } # if found Mozilla cookies
-    } # if solaris
+    } # if Unix
   else
     {
     # Future expansion: implement Netscape / other OS combinations
@@ -329,6 +367,10 @@ sub _callback_mozilla
   $oReal->set_cookie(@_);
   } # _callback_mozilla
 
+1;
+
+__END__
+
 =back
 
 =head1 BUGS
@@ -348,8 +390,10 @@ it and/or modify it under the same terms as Perl itself.
 
 HTTP::Cookies, HTTP::Cookies::Microsoft, HTTP::Cookies::Mozilla, HTTP::Cookies::Netscape
 
+=head1 SPECIAL THANKS
+
+To David Gilder, for the FireFox (Mozilla) code additions.
+To David Gilder, for the Vista MSIE code additions.
+
 =cut
 
-1;
-
-__END__

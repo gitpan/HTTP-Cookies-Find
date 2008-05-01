@@ -1,3 +1,7 @@
+2008-05-01    <Martin@BLUEMAX>
+
+	* lib/HTTP/Cookies/Find.pm (new): fixed for Mozilla and MSIE Vista
+
 2007-04-25    <Daddy@C-3PO>
 
 	* lib/HTTP/Cookies/Find.pm: added pod for methods

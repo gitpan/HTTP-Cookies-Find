@@ -1,20 +1,20 @@
-# $Id: Makefile.PL,v 1.7 2008/03/06 04:22:03 Daddy Exp $
+# $Id: Makefile.PL,v 1.9 2008/05/01 22:53:08 Martin Exp $
 
 use inc::Module::Install;
 
-name('HTTP-Cookies-Find');
-version_from('lib/HTTP/Cookies/Find.pm');
-abstract('Find local cookies file(s) for current user');
-author('Martin Thurn <mthurn@cpan.org>');
+# Name('HTTP-Cookies-Find');
+all_from('lib/HTTP/Cookies/Find.pm');
 license('perl');
 
+requires('Carp');
 requires('Config::IniFiles');
+requires('Data::Dumper');
 requires('File::HomeDir');
 requires('File::Spec');
 requires('File::Slurp');
 requires('HTTP::Cookies');
-recommends('HTTP::Cookies::Mozilla');
-recommends('HTTP::Cookies::Netscape');
+requires('HTTP::Cookies::Mozilla');
+requires('HTTP::Cookies::Netscape');
 build_requires('Test::More');
 build_requires('Test::Simple');
 requires('User');
@@ -22,7 +22,7 @@ requires('User');
 if ($^O =~ m!win32!i)
   {
   recommends('HTTP::Cookies::Microsoft');
-  requires('Win32::TieRegistry');
+  recommends('Win32::TieRegistry');
   print STDERR <<'NOTES';
 
 Note: Win32::TieRegistry is only needed to find MSIE cookies;

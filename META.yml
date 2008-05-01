@@ -1,31 +1,33 @@
---- 
-abstract: Find local cookies file(s) for current user
-author: 
-  - Martin Thurn <mthurn@cpan.org>
-build_requires: 
+---
+abstract: 'Locate cookies for the current user on the local machine.'
+author:
+  - 'Martin Thurn <mthurn@cpan.org>'
+build_requires:
   Test::More: 0
   Test::Simple: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: 'Module::Install version 0.72'
 license: perl
-meta-spec: 
+meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
   version: 1.3
 name: HTTP-Cookies-Find
-no_index: 
-  directory: 
+no_index:
+  directory:
     - inc
     - t
-recommends: 
+recommends:
   HTTP::Cookies::Microsoft: 0
-  HTTP::Cookies::Mozilla: 0
-  HTTP::Cookies::Netscape: 0
-requires: 
+  Win32::TieRegistry: 0
+requires:
+  Carp: 0
   Config::IniFiles: 0
+  Data::Dumper: 0
   File::HomeDir: 0
   File::Slurp: 0
   File::Spec: 0
   HTTP::Cookies: 0
+  HTTP::Cookies::Mozilla: 0
+  HTTP::Cookies::Netscape: 0
   User: 0
-  Win32::TieRegistry: 0
-version: 1.413
+version: 1.414
