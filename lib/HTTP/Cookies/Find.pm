@@ -1,5 +1,5 @@
 
-# $Id: Find.pm,v 1.414 2008/05/01 22:52:42 Martin Exp $
+# $Id: Find.pm,v 1.415 2010-05-08 12:42:51 Martin Exp $
 
 package HTTP::Cookies::Find;
 
@@ -18,7 +18,7 @@ use HTTP::Cookies::Netscape;
 use User;
 
 our
-$VERSION = do { my @r = (q$Revision: 1.414 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 1.415 $ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
 
 =head1 NAME
 
@@ -95,7 +95,7 @@ sub new
       eval q{require HTTP::Cookies::Microsoft};
       if ($@)
         {
-        _add_error qq{ --- can not require HTTP::Cookies::Microsoft: $@\n};
+        _add_error qq{ EEE can not load module HTTP::Cookies::Microsoft: $@\n};
         last WIN32_MSIE;
         } # if
       eval q{use Win32::TieRegistry(
@@ -104,18 +104,18 @@ sub new
                                    )};
       if ($@)
         {
-        _add_error qq{ --- can not use Win32::TieRegistry: $@\n};
+        _add_error qq{ EEE can not load module Win32::TieRegistry: $@\n};
         last WIN32_MSIE;
         } # if
       $sDir = $hsRegistry{"CUser/Software/Microsoft/Windows/CurrentVersion/Explorer/Shell Folders/Cookies"} || '';
       if ($sDir eq '')
         {
-        _add_error qq{ --- can not find registry entry for MSIE cookies\n};
+        _add_error qq{ EEE can not find registry entry for MSIE cookies\n};
         last WIN32_MSIE;
         } # if
       unless (-d $sDir)
         {
-        ; _add_error qq{ --- registry entry for MSIE cookies is $sDir but that directory does not exist.\n}
+        ; _add_error qq{ EEE registry entry for MSIE cookies is $sDir but that directory does not exist.\n}
         ; last WIN32_MSIE
         } # unless
       # index.dat is for XP; Low/index.dat is for Vista:
@@ -144,7 +144,7 @@ sub new
       my $sFnameWinIni = catfile($sDirWin, 'win.ini');
       if (! -f $sFnameWinIni)
         {
-        _add_error qq{ --- Windows ini file $sFnameWinIni does not exist\n};
+        _add_error qq{ EEE Windows ini file $sFnameWinIni does not exist\n};
         last WIN32_NETSCAPE;
         } # if
       my $oIniWin = new Config::IniFiles(
@@ -152,13 +152,18 @@ sub new
                                         );
       if (! ref($oIniWin))
         {
-        _add_error qq{ --- can not parse $sFnameWinIni\n};
+        _add_error qq{ EEE can not parse $sFnameWinIni\n};
         last WIN32_NETSCAPE;
         } # if
       my $sFnameNSIni = $oIniWin->val('Netscape', 'ini');
+      if (! defined $sFnameNSIni)
+        {
+        _add_error qq{ EEE Netscape / Mozilla is not installed\n};
+        last WIN32_NETSCAPE;
+        } # if
       if (! -f $sFnameNSIni)
         {
-        _add_error qq{ --- Netscape ini file $sFnameNSIni does not exist\n};
+        _add_error qq{ EEE Netscape ini file $sFnameNSIni does not exist\n};
         last WIN32_NETSCAPE;
         } # if
       my $oIniNS = Config::IniFiles->new(
@@ -166,7 +171,7 @@ sub new
                                         );
       if (! ref($oIniNS))
         {
-        _add_error qq{ --- can not parse $sFnameNSIni\n};
+        _add_error qq{ EEE can not parse $sFnameNSIni\n};
         last WIN32_NETSCAPE;
         } # if
       my $sFnameCookies = $oIniNS->val('Cookies', 'Cookie File');
@@ -184,7 +189,11 @@ sub new
       {
       $oReal = undef;
       my $sProfileDir = "$ENV{APPDATA}/Mozilla/Firefox/Profiles";
-      opendir (DIR, $sProfileDir) or _add_error qq{ --- Can't open Mozilla profile directory ( $sProfileDir ): $! };
+      if (! opendir (DIR, $sProfileDir))
+        {
+        _add_error qq{ EEE Can't open Mozilla profile directory ( $sProfileDir ): $! };
+        last WIN32_FIREFOX;
+        } # if
       my $bMozFound;
       while ( my $test = readdir( DIR ) )
         {
@@ -198,7 +207,7 @@ sub new
       closedir DIR or warn;
       if ( ! $bMozFound )
         {
-        _add_error qq{ --- No Mozilla cookie files found under $sProfileDir\\* }
+        _add_error qq{ EEE No Mozilla cookie files found under $sProfileDir\\* }
         } # if
       } # end of WIN32_FIREFOX block
     # At this point, $oReal contains Netscape cookies (or undef):
@@ -249,7 +258,7 @@ sub new
       # ; print STDERR " + try to read appreg ==$sAppregFname==\n"
       ; if (! -f $sAppregFname)
         {
-        ; _add_error qq{ --- Mozilla file $sAppregFname does not exist\n};
+        ; _add_error qq{ EEE Mozilla file $sAppregFname does not exist\n};
         ; last UNIX_MOZILLA
         } # if
       ; my $sAppreg
@@ -303,7 +312,7 @@ sub _get_cookies
   print STDERR " + _get_cookies($sFnameCookies,$sClass)\n" if DEBUG_GET;
   if (! -f $sFnameCookies)
     {
-    _add_error qq{ --- cookies file $sFnameCookies does not exist\n};
+    _add_error qq{ EEE cookies file $sFnameCookies does not exist\n};
     return undef;
     } # if
   # Because $oReal is a global variable, force creation of a new
@@ -311,7 +320,7 @@ sub _get_cookies
   my $oRealNS = $sClass->new;
   unless (ref $oRealNS)
     {
-    _add_error qq{ --- can not create an empty $sClass object.\n};
+    _add_error qq{ EEE can not create an empty $sClass object.\n};
     return undef;
     } # unless
   print STDERR " +   created oRealNS ==$oRealNS==...\n" if DEBUG_GET;
@@ -324,7 +333,7 @@ sub _get_cookies
                            );
   unless (ref $oDummy)
     {
-    _add_error qq{ --- can not create an empty $sClass object.\n};
+    _add_error qq{ EEE can not create an empty $sClass object.\n};
     return undef;
     } # unless
   print STDERR " +   created oDummy ==$oDummy==...\n" if DEBUG_GET;
@@ -379,7 +388,7 @@ Please notify the author if you find any.
 
 =head1 AUTHOR
 
-Martin Thurn E<lt>mthurn@cpan.orgE<gt>
+Martin Thurn C<mthurn at cpan.org>
 
 =head1 COPYRIGHT
 

@@ -1,10 +1,8 @@
-# $Id: Makefile.PL,v 1.9 2008/05/01 22:53:08 Martin Exp $
+# $Id: Makefile.PL,v 1.10 2009/01/15 20:38:03 Martin Exp $
 
 use inc::Module::Install;
 
-# Name('HTTP-Cookies-Find');
 all_from('lib/HTTP/Cookies/Find.pm');
-license('perl');
 
 requires('Carp');
 requires('Config::IniFiles');
@@ -15,8 +13,8 @@ requires('File::Slurp');
 requires('HTTP::Cookies');
 requires('HTTP::Cookies::Mozilla');
 requires('HTTP::Cookies::Netscape');
-build_requires('Test::More');
-build_requires('Test::Simple');
+test_requires('Test::More');
+test_requires('Test::Simple');
 requires('User');
 
 if ($^O =~ m!win32!i)
